@@ -14,6 +14,7 @@ private let reuseIdentifier = "Cell"
     optional    func epCalendarPicker(calendar: EPCalendarPicker, didCancel error : NSError)
     optional    func epCalendarPicker(calendar: EPCalendarPicker, didSelectDate date : NSDate)
     optional    func epCalendarPicker(calendar: EPCalendarPicker, didSelectMultipleDate dates : [NSDate])
+    optional    func epCalendarPicker(calendar:EPCalendarPicker, didDeselectDate date : NSDate)
 }
 
 public class EPCalendarPicker: UICollectionView,UICollectionViewDataSource,UICollectionViewDelegate{
@@ -222,6 +223,7 @@ public class EPCalendarPicker: UICollectionView,UICollectionViewDataSource,UICol
             if arrSelectedDates.filter({ $0.isDateSameDay(cell.currentDate)
             }).count == 0 {
                 arrSelectedDates.append(cell.currentDate)
+                calendarDelegate?.epCalendarPicker?(self, didSelectMultipleDate: arrSelectedDates)
                 cell.selectedForLabelColor(dateSelectionColor)
                 
                 if cell.currentDate.isToday() {
@@ -241,6 +243,7 @@ public class EPCalendarPicker: UICollectionView,UICollectionViewDataSource,UICol
                 if cell.currentDate.isToday() && hightlightsToday{
                     cell.setTodayCellColor(todayTintColor)
                 }
+                calendarDelegate?.epCalendarPicker?(self, didDeselectDate: cell.currentDate)
             }
         }
         
