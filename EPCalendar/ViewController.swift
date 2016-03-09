@@ -12,14 +12,17 @@ class ViewController: UIViewController, EPCalendarPickerDelegate {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        let CalendarView = EPCalendarPicker(startYear: 2016, endYear: 2017, multiSelection: false, selectedDates: [], frame: self.view.frame)
         // Do any additional setup after loading the view, typically from a nib.
     }
 
     override func viewWillAppear(animated: Bool) {
         let CalendarView = EPCalendarPicker(startYear: 2016, endYear: 2017, multiSelection: false, selectedDates: [], frame: self.view.frame)
+        CalendarView.multiSelectEnabled = false
+        CalendarView.calendarDelegate = self
         self.view.addSubview(CalendarView)
     }
+    
+    
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.

@@ -74,6 +74,9 @@ public class EPCalendarPicker: UICollectionView,UICollectionViewDataSource,UICol
         self.registerNib(UINib(nibName: "EPCalendarCell1", bundle: NSBundle(forClass: EPCalendarPicker.self )), forCellWithReuseIdentifier: reuseIdentifier)
         self.registerNib(UINib(nibName: "EPCalendarHeaderView", bundle: NSBundle(forClass: EPCalendarPicker.self )), forSupplementaryViewOfKind: UICollectionElementKindSectionHeader, withReuseIdentifier: "Header")
          self.backgroundColor = UIColor.clearColor()
+        dispatch_async(dispatch_get_main_queue()) { () -> Void in
+            self.scrollToToday()
+        }
     }
     
 
@@ -210,7 +213,7 @@ public class EPCalendarPicker: UICollectionView,UICollectionViewDataSource,UICol
      public func collectionView(collectionView: UICollectionView, didSelectItemAtIndexPath indexPath: NSIndexPath) {
         let cell = collectionView.cellForItemAtIndexPath(indexPath) as! EPCalendarCell1
         if !multiSelectEnabled {
-            calendarDelegate?.epCalendarPicker!(self, didSelectDate: cell.currentDate)
+            calendarDelegate?.epCalendarPicker?(self, didSelectDate: cell.currentDate)
             cell.selectedForLabelColor(dateSelectionColor)
             return
         }
@@ -243,6 +246,10 @@ public class EPCalendarPicker: UICollectionView,UICollectionViewDataSource,UICol
         
     }
     
+    public func scrollToToday () {
+        let today = NSDate()
+        scrollToMonthForDate(today)
+    }
     
     public func scrollToMonthForDate (date: NSDate) {
 
