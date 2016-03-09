@@ -20,6 +20,7 @@ class ViewController: UIViewController, EPCalendarPickerDelegate {
         CalendarView.multiSelectEnabled = true
         CalendarView.calendarDelegate = self
         self.view.addSubview(CalendarView)
+         CalendarView.addDates([NSDate()])
     }
     
     func epCalendarPicker(calendar: EPCalendarPicker, didSelectMultipleDate dates: [NSDate]) {

@@ -23,7 +23,7 @@ public class EPCalendarPicker: UICollectionView,UICollectionViewDataSource,UICol
     public var multiSelectEnabled: Bool
     public var showsTodaysButton: Bool = true
     private var arrSelectedDates = [NSDate]()
-    
+    private var defaultDates = [NSDate]()
     public var dayDisabledTintColor: UIColor
     public var weekdayTintColor: UIColor
     public var weekendTintColor: UIColor
@@ -41,7 +41,6 @@ public class EPCalendarPicker: UICollectionView,UICollectionViewDataSource,UICol
     
     private(set) public var startYear: Int
     private(set) public var endYear: Int
-    
     
     public init(startYear: Int, endYear: Int, multiSelection: Bool, selectedDates: [NSDate]?,frame:CGRect) {
         
@@ -81,6 +80,12 @@ public class EPCalendarPicker: UICollectionView,UICollectionViewDataSource,UICol
     }
     
 
+    func addDates(dates:[NSDate]){
+        for date in dates{
+            defaultDates.append(date.toGMT()!)
+        }
+        self.reloadData()
+    }
     required public init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
@@ -96,7 +101,7 @@ public class EPCalendarPicker: UICollectionView,UICollectionViewDataSource,UICol
         let numberOfMonths = 12 * (endYear - startYear) + 12
         return numberOfMonths
     }
-
+    
 
     public func collectionView(collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         
@@ -127,7 +132,6 @@ public class EPCalendarPicker: UICollectionView,UICollectionViewDataSource,UICol
             
             cell.currentDate = currentDate
             cell.lblDay.text = "\(currentDate.day())"
-            print(currentDate)
             
             if arrSelectedDates.filter({ $0.isDateSameDay(currentDate)
             }).count > 0 && (firstDayOfThisMonth.month() == currentDate.month()) {
@@ -136,7 +140,7 @@ public class EPCalendarPicker: UICollectionView,UICollectionViewDataSource,UICol
             }
             else{
                 cell.deSelectedForLabelColor(weekdayTintColor)
-               
+            
                 if cell.currentDate.isSaturday() || cell.currentDate.isSunday() {
                     cell.lblDay.textColor = weekendTintColor
                 }
@@ -172,7 +176,10 @@ public class EPCalendarPicker: UICollectionView,UICollectionViewDataSource,UICol
                 cell.lblDay.textColor = self.dayDisabledTintColor
             }
         }
-        
+        if (defaultDates.contains(cell.currentDate.toGMT()!)){
+            print("coucou")
+            cell.setTodayCellColor(UIColor.redColor()) //TO MODIFY
+        }
         cell.backgroundColor = UIColor.clearColor()
         return cell
     }
