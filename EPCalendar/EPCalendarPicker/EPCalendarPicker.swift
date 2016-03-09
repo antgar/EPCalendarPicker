@@ -11,18 +11,17 @@ import UIKit
 private let reuseIdentifier = "Cell"
 
 @objc public protocol EPCalendarPickerDelegate{
-    optional    func epCalendarPicker(_: EPCalendarPicker, didCancel error : NSError)
-    optional    func epCalendarPicker(_: EPCalendarPicker, didSelectDate date : NSDate)
-    optional    func epCalendarPicker(_: EPCalendarPicker, didSelectMultipleDate dates : [NSDate])
+    optional    func epCalendarPicker(calendar: EPCalendarPicker, didCancel error : NSError)
+    optional    func epCalendarPicker(calendar: EPCalendarPicker, didSelectDate date : NSDate)
+    optional    func epCalendarPicker(calendar: EPCalendarPicker, didSelectMultipleDate dates : [NSDate])
 }
 
-public class EPCalendarPicker: UICollectionViewController {
+public class EPCalendarPicker: UICollectionView,UICollectionViewDataSource,UICollectionViewDelegate{
 
     public var calendarDelegate : EPCalendarPickerDelegate?
     public var multiSelectEnabled: Bool
     public var showsTodaysButton: Bool = true
     private var arrSelectedDates = [NSDate]()
-    public var tintColor: UIColor
     
     public var dayDisabledTintColor: UIColor
     public var weekdayTintColor: UIColor
@@ -38,99 +37,20 @@ public class EPCalendarPicker: UICollectionViewController {
     public var barTintColor: UIColor
     
     public var backgroundImage: UIImage?
-    public var backgroundColor: UIColor?
     
     private(set) public var startYear: Int
     private(set) public var endYear: Int
     
-    override public func viewDidLoad() {
-        super.viewDidLoad()
-        
-        // setup Navigationbar
-        self.navigationController?.navigationBar.tintColor = self.tintColor
-        self.navigationController?.navigationBar.barTintColor = self.barTintColor
-        self.navigationController?.navigationBar.titleTextAttributes = [NSForegroundColorAttributeName:self.tintColor]
-
-        // setup collectionview
-        self.collectionView?.delegate = self
-        self.collectionView?.backgroundColor = UIColor.clearColor()
-        self.collectionView?.showsHorizontalScrollIndicator = false
-        self.collectionView?.showsVerticalScrollIndicator = false
-
-        // Register cell classes
-        self.collectionView!.registerNib(UINib(nibName: "EPCalendarCell1", bundle: NSBundle(forClass: EPCalendarPicker.self )), forCellWithReuseIdentifier: reuseIdentifier)
-        self.collectionView!.registerNib(UINib(nibName: "EPCalendarHeaderView", bundle: NSBundle(forClass: EPCalendarPicker.self )), forSupplementaryViewOfKind: UICollectionElementKindSectionHeader, withReuseIdentifier: "Header")
-        
-        inititlizeBarButtons()
-
-        dispatch_async(dispatch_get_main_queue()) { () -> Void in
-            self.scrollToToday()
-        }
-        
-        if backgroundImage != nil {
-            self.collectionView!.backgroundView =  UIImageView(image: backgroundImage)
-        } else if backgroundColor != nil {
-            self.collectionView?.backgroundColor = backgroundColor
-        } else {
-            self.collectionView?.backgroundColor = UIColor.whiteColor()
-        }
-    }
-
     
-    func inititlizeBarButtons(){
-        
-
-        let cancelButton = UIBarButtonItem(barButtonSystemItem: UIBarButtonSystemItem.Cancel, target: self, action: "onTouchCancelButton")
-        self.navigationItem.leftBarButtonItem = cancelButton
-
-        var arrayBarButtons  = [UIBarButtonItem]()
-        
-        if multiSelectEnabled {
-            let doneButton = UIBarButtonItem(barButtonSystemItem: UIBarButtonSystemItem.Done, target: self, action: "onTouchDoneButton")
-            arrayBarButtons.append(doneButton)
-        }
-        
-        if showsTodaysButton {
-            let todayButton = UIBarButtonItem(title: "Today", style: UIBarButtonItemStyle.Plain, target: self, action:"onTouchTodayButton")
-            arrayBarButtons.append(todayButton)
-            todayButton.tintColor = todayTintColor
-        }
-        
-        self.navigationItem.rightBarButtonItems = arrayBarButtons
-        
-    }
-    
-    override public func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
-    }
-    
-
-    public convenience init(){
-        self.init(startYear: EPDefaults.startYear, endYear: EPDefaults.endYear, multiSelection: EPDefaults.multiSelection, selectedDates: nil);
-    }
-    
-    public convenience init(startYear: Int, endYear: Int) {
-        self.init(startYear:startYear, endYear:endYear, multiSelection: EPDefaults.multiSelection, selectedDates: nil)
-    }
-    
-    public convenience init(multiSelection: Bool) {
-        self.init(startYear: EPDefaults.startYear, endYear: EPDefaults.endYear, multiSelection: multiSelection, selectedDates: nil)
-    }
-    
-    public convenience init(startYear: Int, endYear: Int, multiSelection: Bool) {
-        self.init(startYear: EPDefaults.startYear, endYear: EPDefaults.endYear, multiSelection: multiSelection, selectedDates: nil)
-    }
-    
-    public init(startYear: Int, endYear: Int, multiSelection: Bool, selectedDates: [NSDate]?) {
+    public init(startYear: Int, endYear: Int, multiSelection: Bool, selectedDates: [NSDate]?,frame:CGRect) {
         
         self.startYear = startYear
         self.endYear = endYear
+        // Register cell classes
         
         self.multiSelectEnabled = multiSelection
-        
         //Text color initializations
-        self.tintColor = EPDefaults.tintColor
+        //self.tintColor = EPDefaults.tintColor
         self.barTintColor = EPDefaults.barTintColor
         self.dayDisabledTintColor = EPDefaults.dayDisabledTintColor
         self.weekdayTintColor = EPDefaults.weekdayTintColor
@@ -148,7 +68,12 @@ public class EPCalendarPicker: UICollectionViewController {
         if let _ = selectedDates  {
             self.arrSelectedDates.appendContentsOf(selectedDates!)
         }
-        super.init(collectionViewLayout: layout)
+        super.init(frame: frame, collectionViewLayout: layout)
+        self.dataSource = self
+        self.delegate = self
+        self.registerNib(UINib(nibName: "EPCalendarCell1", bundle: NSBundle(forClass: EPCalendarPicker.self )), forCellWithReuseIdentifier: reuseIdentifier)
+        self.registerNib(UINib(nibName: "EPCalendarHeaderView", bundle: NSBundle(forClass: EPCalendarPicker.self )), forSupplementaryViewOfKind: UICollectionElementKindSectionHeader, withReuseIdentifier: "Header")
+         self.backgroundColor = UIColor.clearColor()
     }
     
 
@@ -158,7 +83,7 @@ public class EPCalendarPicker: UICollectionViewController {
 
     // MARK: UICollectionViewDataSource
 
-    override public func numberOfSectionsInCollectionView(collectionView: UICollectionView) -> Int {
+     public func numberOfSectionsInCollectionView(collectionView: UICollectionView) -> Int {
         // #warning Incomplete implementation, return the number of sections
         if startYear > endYear {
             return 0
@@ -169,7 +94,7 @@ public class EPCalendarPicker: UICollectionViewController {
     }
 
 
-    override public func collectionView(collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+    public func collectionView(collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         
         let startDate = NSDate(year: startYear, month: 1, day: 1)
         let firstDayOfMonth = startDate.dateByAddingMonths(section)
@@ -183,7 +108,7 @@ public class EPCalendarPicker: UICollectionViewController {
         return totalNumber
     }
 
-    override public func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
+     public func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
 
         let cell = collectionView.dequeueReusableCellWithReuseIdentifier(reuseIdentifier, forIndexPath: indexPath) as! EPCalendarCell1
         
@@ -262,7 +187,7 @@ public class EPCalendarPicker: UICollectionViewController {
         return UIEdgeInsetsMake(5, 0, 5, 0); //top,left,bottom,right
     }
     
-    override public func collectionView(collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, atIndexPath indexPath: NSIndexPath) -> UICollectionReusableView {
+    public func collectionView(collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, atIndexPath indexPath: NSIndexPath) -> UICollectionReusableView {
 
         if kind == UICollectionElementKindSectionHeader {
             let header = collectionView.dequeueReusableSupplementaryViewOfKind(UICollectionElementKindSectionHeader, withReuseIdentifier: "Header", forIndexPath: indexPath) as! EPCalendarHeaderView
@@ -282,12 +207,11 @@ public class EPCalendarPicker: UICollectionViewController {
         return UICollectionReusableView()
     }
     
-    override public func collectionView(collectionView: UICollectionView, didSelectItemAtIndexPath indexPath: NSIndexPath) {
+     public func collectionView(collectionView: UICollectionView, didSelectItemAtIndexPath indexPath: NSIndexPath) {
         let cell = collectionView.cellForItemAtIndexPath(indexPath) as! EPCalendarCell1
         if !multiSelectEnabled {
             calendarDelegate?.epCalendarPicker!(self, didSelectDate: cell.currentDate)
             cell.selectedForLabelColor(dateSelectionColor)
-            dismissViewControllerAnimated(true, completion: nil)
             return
         }
         
@@ -319,30 +243,6 @@ public class EPCalendarPicker: UICollectionViewController {
         
     }
     
-    //MARK: Button Actions
-    
-    internal func onTouchCancelButton() {
-       //TODO: Create a cancel delegate
-        calendarDelegate?.epCalendarPicker!(self, didCancel: NSError(domain: "EPCalendarPickerErrorDomain", code: 2, userInfo: [ NSLocalizedDescriptionKey: "User Canceled Selection"]))
-        dismissViewControllerAnimated(true, completion: nil)
-        
-    }
-    
-    internal func onTouchDoneButton() {
-        //gathers all the selected dates and pass it to the delegate
-        calendarDelegate?.epCalendarPicker!(self, didSelectMultipleDate: arrSelectedDates)
-        dismissViewControllerAnimated(true, completion: nil)
-    }
-
-    internal func onTouchTodayButton() {
-        scrollToToday()
-    }
-    
-    
-    public func scrollToToday () {
-        let today = NSDate()
-        scrollToMonthForDate(today)
-    }
     
     public func scrollToMonthForDate (date: NSDate) {
 
@@ -351,7 +251,7 @@ public class EPCalendarPicker: UICollectionViewController {
         let section = ((year - startYear) * 12) + month
         let indexPath = NSIndexPath(forRow:1, inSection: section-1)
         
-        self.collectionView?.scrollToIndexpathByShowingHeader(indexPath)
+        self.scrollToIndexpathByShowingHeader(indexPath)
     }
     
     
