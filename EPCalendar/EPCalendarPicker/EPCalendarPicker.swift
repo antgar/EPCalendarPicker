@@ -186,9 +186,6 @@ public class EPCalendarPicker: UICollectionView,UICollectionViewDataSource,UICol
             }
         }
         if let indexDate = defaultDates.indexOf(cell.currentDate.toGMT()){
-            print("FOUND")
-            print(defaultDates[indexDate])
-            print(cell.currentDate.toGMT())
             cell.setTodayCellColor(colorForDate[indexDate])
         }
         cell.backgroundColor = UIColor.clearColor()
@@ -252,7 +249,6 @@ public class EPCalendarPicker: UICollectionView,UICollectionViewDataSource,UICol
                 arrSelectedDates = arrSelectedDates.filter(){
                     return  !($0.isDateSameDay(cell.currentDate))
                 }
-                deselectDate(cell.currentDate.toGMT())
                 if cell.currentDate.isSaturday() || cell.currentDate.isSunday() {
                     cell.deSelectedForLabelColor(weekendTintColor)
                 }
@@ -262,6 +258,13 @@ public class EPCalendarPicker: UICollectionView,UICollectionViewDataSource,UICol
                 if cell.currentDate.isToday() && hightlightsToday{
                     cell.setTodayCellColor(todayTintColor)
                 }
+                if let indexDate = defaultDates.indexOf(cell.currentDate.toGMT()){
+                    print("FOUND")
+                    print(defaultDates[indexDate])
+                    print(cell.currentDate.toGMT())
+                    cell.setTodayCellColor(colorForDate[indexDate])
+                }
+                //deselectDate(cell.currentDate.toGMT())
                 calendarDelegate?.epCalendarPicker?(self, didDeselectDate: cell.currentDate)
             }
         }
