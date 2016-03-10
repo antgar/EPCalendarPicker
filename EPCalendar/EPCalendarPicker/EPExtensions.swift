@@ -50,11 +50,11 @@ extension NSDate {
         
     }
     
-    func toGMT()->NSDate?{
+    func toGMT()->NSDate{
         let calendar = NSCalendar.currentCalendar()
         let components = calendar.components([.Year,.Month,.Day], fromDate: self)
         calendar.timeZone = NSTimeZone(abbreviation: "GMT")!
-        return calendar.dateFromComponents(components)
+        return calendar.dateFromComponents(components)!
     }
     func firstDayOfMonth () -> NSDate {
         let calendar = NSCalendar.currentCalendar()

@@ -24,6 +24,7 @@ public class EPCalendarPicker: UICollectionView,UICollectionViewDataSource,UICol
     public var showsTodaysButton: Bool = true
     private var arrSelectedDates = [NSDate]()
     private var defaultDates = [NSDate]()
+    private var colorForDate = [UIColor]()
     public var dayDisabledTintColor: UIColor
     public var weekdayTintColor: UIColor
     public var weekendTintColor: UIColor
@@ -80,11 +81,10 @@ public class EPCalendarPicker: UICollectionView,UICollectionViewDataSource,UICol
     }
     
 
-    func addDates(dates:[NSDate]){
-        for date in dates{
-            defaultDates.append(date.toGMT()!)
-        }
-        self.reloadData()
+    
+    func addDates(date:NSDate, withColor color:UIColor){
+        defaultDates.append(date.toGMT())
+        colorForDate.append(color)
     }
     required public init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
@@ -176,9 +176,9 @@ public class EPCalendarPicker: UICollectionView,UICollectionViewDataSource,UICol
                 cell.lblDay.textColor = self.dayDisabledTintColor
             }
         }
-        if (defaultDates.contains(cell.currentDate.toGMT()!)){
-            print("coucou")
-            cell.setTodayCellColor(UIColor.redColor()) //TO MODIFY
+        if let indexDate = defaultDates.indexOf(cell.currentDate.toGMT()){
+            print("OKOKOK")
+            cell.setTodayCellColor(colorForDate[indexDate])
         }
         cell.backgroundColor = UIColor.clearColor()
         return cell
