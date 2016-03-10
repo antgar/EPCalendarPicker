@@ -82,9 +82,18 @@ public class EPCalendarPicker: UICollectionView,UICollectionViewDataSource,UICol
     
 
     
-    func addDates(date:NSDate, withColor color:UIColor){
+    func addDate(date:NSDate, withColor color:UIColor){
         defaultDates.append(date.toGMT())
         colorForDate.append(color)
+        self.reloadData()
+    }
+    
+    private func deselectDate(date:NSDate){
+        if let indexDate = defaultDates.indexOf(date){
+            defaultDates.removeAtIndex(indexDate)
+            colorForDate.removeAtIndex(indexDate)
+            self.reloadData()
+        }
     }
     required public init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
@@ -177,7 +186,9 @@ public class EPCalendarPicker: UICollectionView,UICollectionViewDataSource,UICol
             }
         }
         if let indexDate = defaultDates.indexOf(cell.currentDate.toGMT()){
-            print("OKOKOK")
+            print("FOUND")
+            print(defaultDates[indexDate])
+            print(cell.currentDate.toGMT())
             cell.setTodayCellColor(colorForDate[indexDate])
         }
         cell.backgroundColor = UIColor.clearColor()
@@ -241,6 +252,7 @@ public class EPCalendarPicker: UICollectionView,UICollectionViewDataSource,UICol
                 arrSelectedDates = arrSelectedDates.filter(){
                     return  !($0.isDateSameDay(cell.currentDate))
                 }
+                deselectDate(cell.currentDate.toGMT())
                 if cell.currentDate.isSaturday() || cell.currentDate.isSunday() {
                     cell.deSelectedForLabelColor(weekendTintColor)
                 }
