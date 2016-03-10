@@ -82,7 +82,7 @@ public class EPCalendarPicker: UICollectionView,UICollectionViewDataSource,UICol
     
 
     
-    func addDate(date:NSDate, withColor color:UIColor){
+    public func addDate(date:NSDate, withColor color:UIColor){
         defaultDates.append(date.toGMT())
         colorForDate.append(color)
         self.reloadData()
