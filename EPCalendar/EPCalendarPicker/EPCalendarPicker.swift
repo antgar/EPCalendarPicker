@@ -80,6 +80,11 @@ public class EPCalendarPicker: UICollectionView,UICollectionViewDataSource,UICol
         }
     }
     
+    public func resetCalendar(){
+        defaultDates = []
+        colorForDate = []
+        self.reloadData()
+    }
 
     
     public func addDate(date:NSDate, withColor color:UIColor){
